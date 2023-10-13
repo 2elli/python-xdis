@@ -504,8 +504,8 @@ class _VersionIndependentUnmarshaller:
             for name, kind in zip(co_localsplusnames, co_localspluskinds):
                 if kind & CO_FAST_LOCAL:
                     co_varnames += (name,)
-                    if kind & CO_FAST_CELL:
-                        co_cellvars += (name,)
+                    # if kind & CO_FAST_CELL:
+                    #     co_cellvars += (name,)
                 elif kind & CO_FAST_CELL:
                     co_cellvars += (name,)
                 elif kind & CO_FAST_FREE:
