@@ -169,6 +169,7 @@ def get_instructions_bytes(
     linestarts=None,
     line_offset=0,
     exception_entries=None,
+    varname_from_oparg=None,
 ):
     """Iterate over the instructions in a bytecode string.
 
@@ -281,13 +282,21 @@ def get_instructions_bytes(
                 optype = "jabs"
             elif op in opc.LOCAL_OPS:
                 if opc.version_tuple >= (3,11):
-                    argval, argrepr = _get_name_info(arg, (varnames or tuple()) + (cells or tuple()))
+                    if varname_from_oparg is not None:
+                        argval = varname_from_oparg(arg)
+                        argrepr = repr(argval)
+                    else:
+                        argval, argrepr = _get_name_info(arg, (varnames or tuple()) + (cells or tuple()))
                 else:
                     argval, argrepr = _get_name_info(arg, varnames)
                 optype = "local"
             elif op in opc.FREE_OPS:
                 if opc.version_tuple >= (3,11):
-                    argval, argrepr = _get_name_info(arg, (varnames or tuple()) + (cells or tuple()))
+                    if varname_from_oparg is not None:
+                        argval = varname_from_oparg(arg)
+                        argrepr = repr(argval)
+                    else:
+                        argval, argrepr = _get_name_info(arg, (varnames or tuple()) + (cells or tuple()))
                 else:
                     argval, argrepr = _get_name_info(arg, cells)
                 optype = "free"
@@ -406,6 +415,7 @@ class Bytecode(object):
             self._linestarts,
             line_offset=self._line_offset,
             exception_entries=self.exception_entries,
+            varname_from_oparg=getattr(co, '_varname_from_oparg', None),
         )
 
     def __repr__(self):
@@ -465,6 +475,7 @@ class Bytecode(object):
             show_source=show_source,
             first_line_number=first_line_number,
             exception_entries=self.exception_entries,
+            varname_from_oparg=getattr(co, '_varname_from_oparg', None)
         )
         return output.getvalue()
 
@@ -495,6 +506,7 @@ class Bytecode(object):
         show_source=True,
         first_line_number: Optional[int] = None,
         exception_entries=None,
+        varname_from_oparg=None,
     ) -> list:
         # Omit the line number column entirely if we have no line number info
         show_lineno = linestarts is not None or self.opc.version_tuple < (2, 3)
@@ -534,6 +546,7 @@ class Bytecode(object):
             linestarts,
             line_offset=line_offset,
             exception_entries=exception_entries,
+            varname_from_oparg=varname_from_oparg,
         ):
             # Python 1.x into early 2.0 uses SET_LINENO
             if last_was_set_lineno:
@@ -622,6 +635,7 @@ class Bytecode(object):
             cell_names,
             linestarts,
             line_offset,
+            varname_from_oparg=getattr(co, '_varname_from_oparg', None),
         )
 
 

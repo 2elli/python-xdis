@@ -59,6 +59,7 @@ class LineOffsetInfo(object):
             constants=code.co_consts,
             cells=code.co_cellvars + code.co_freevars,
             linestarts=self.linestarts,
+            varname_from_oparg=getattr(code, '_varname_from_oparg', None),
         ):
             offset = instr.offset
             self.offsets.append(offset)

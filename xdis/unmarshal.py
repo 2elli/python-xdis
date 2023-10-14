@@ -504,8 +504,8 @@ class _VersionIndependentUnmarshaller:
             for name, kind in zip(co_localsplusnames, co_localspluskinds):
                 if kind & CO_FAST_LOCAL:
                     co_varnames += (name,)
-                    # if kind & CO_FAST_CELL:
-                    #     co_cellvars += (name,)
+                    if kind & CO_FAST_CELL:
+                        co_cellvars += (name,)
                 elif kind & CO_FAST_CELL:
                     co_cellvars += (name,)
                 elif kind & CO_FAST_FREE:
@@ -570,6 +570,11 @@ class _VersionIndependentUnmarshaller:
             co_exceptiontable=co_exceptiontable,
             version_triple=version_tuple,
         )
+
+        if version_tuple >= (3, 11):
+            def _varname_from_oparg(arg):
+                return co_localsplusnames[arg]
+            setattr(code, '_varname_from_oparg', _varname_from_oparg)
 
         self.code_objects[str(code)] = code
         ret = code
